@@ -1,7 +1,7 @@
 import Vapor
 import Fluent
 
-final class Message: Model, Content {
+final class Message: Model, Content, Sendable {
     static let schema = "messages"
     
     @ID(key: .id)
@@ -10,26 +10,29 @@ final class Message: Model, Content {
     @Field(key: "content")
     var content: String
     
-    @Parent(key: "ticket_id")
-    var ticket: Ticket
+    @Parent(key: "conversation_id")
+    var conversation: Conversation
     
     @Parent(key: "user_id")
     var user: User
     
-    @OptionalParent(key: "conversation_id")
-    var conversation: Conversation?
+    @Parent(key: "ticket_id")
+    var ticket: Ticket
     
     @Timestamp(key: "created_at", on: .create)
     var createdAt: Date?
     
+    @Timestamp(key: "updated_at", on: .update)
+    var updatedAt: Date?
+    
     init() { }
     
-    init(id: UUID? = nil, content: String, ticketID: UUID, userID: UUID, conversationID: UUID? = nil) {
+    init(id: UUID? = nil, content: String, conversationId: UUID, userId: UUID, ticketId: UUID) {
         self.id = id
         self.content = content
-        self.$ticket.id = ticketID
-        self.$user.id = userID
-        self.$conversation.id = conversationID
+        self.$conversation.id = conversationId
+        self.$user.id = userId
+        self.$ticket.id = ticketId
     }
 }
 

@@ -29,10 +29,12 @@ struct UserController: RouteCollection {
         }
         let create = try req.content.decode(CreateUserRequest.self)
         let newUser = User(
-            name: create.name,
+            id: nil,
             email: create.email,
             passwordHash: try Bcrypt.hash(create.password),
-            role: create.role
+            name: create.name,
+            role: create.role,
+            isSuspended: false
         )
         try await newUser.save(on: req.db)
         return newUser.toPublic()
@@ -112,7 +114,7 @@ struct CreateUserRequest: Content {
     let name: String
     let email: String
     let password: String
-    let role: User.Role
+    let role: UserRole
 }
 
 struct UpdateUserRequest: Content {

@@ -45,8 +45,7 @@ func configure(_ app: Application) throws {
         CreateEmailSettings(),
         CreateTicket(),
         CreateConversation(),
-        CreateMessage(),
-        AddIsSuspendedToUser()
+        CreateMessage()
     ])
     
     // Run migrations

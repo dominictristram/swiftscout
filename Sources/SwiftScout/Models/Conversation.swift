@@ -6,20 +6,20 @@ enum ConversationStatus: String, Content {
     case closed
 }
 
-final class Conversation: Model, Content {
+final class Conversation: Model, Content, Sendable {
     static let schema = "conversations"
     
     @ID(key: .id)
     var id: UUID?
     
-    @Parent(key: "ticket_id")
-    var ticket: Ticket
+    @Field(key: "subject")
+    var subject: String
+    
+    @Field(key: "status")
+    var status: String
     
     @Parent(key: "user_id")
     var user: User
-    
-    @Children(for: \Message.$conversation)
-    var messages: [Message]
     
     @Timestamp(key: "created_at", on: .create)
     var createdAt: Date?
@@ -29,10 +29,11 @@ final class Conversation: Model, Content {
     
     init() { }
     
-    init(id: UUID? = nil, ticketID: UUID, userID: UUID) {
+    init(id: UUID? = nil, subject: String, status: String, userId: UUID) {
         self.id = id
-        self.$ticket.id = ticketID
-        self.$user.id = userID
+        self.subject = subject
+        self.status = status
+        self.$user.id = userId
     }
 }
 

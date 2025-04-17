@@ -7,7 +7,7 @@ struct AuthController: RouteCollection {
         // Routes are configured in routes.swift
     }
     
-    func register(req: Request) async throws -> User {
+    func register(req: Request) async throws -> TokenResponse {
         do {
             try User.Create.validate(content: req)
             let create = try req.content.decode(User.Create.self)
@@ -19,14 +19,26 @@ struct AuthController: RouteCollection {
             }
             
             let user = try User(
-                name: create.name,
+                id: nil,
                 email: create.email,
                 passwordHash: try Bcrypt.hash(create.password),
-                role: create.role
+                name: create.name,
+                role: create.role,
+                isSuspended: false
             )
             
             try await user.save(on: req.db)
-            return user
+            
+            let payload = UserPayload(
+                subject: .init(value: user.email),
+                expiration: .init(value: Date().addingTimeInterval(3600)),
+                userID: try user.requireID(),
+                email: user.email,
+                role: user.role
+            )
+            
+            let token = try req.jwt.sign(payload)
+            return TokenResponse(token: token)
         } catch {
             req.logger.error("Registration error: \(String(reflecting: error))")
             throw error
@@ -72,16 +84,16 @@ struct UserPayload: JWTPayload, Sendable {
     enum CodingKeys: String, CodingKey {
         case subject = "sub"
         case expiration = "exp"
-        case userID = "uid"
-        case email = "email"
-        case role = "role"
+        case userID = "user_id"
+        case email
+        case role
     }
     
     var subject: SubjectClaim
     var expiration: ExpirationClaim
     var userID: UUID
     var email: String
-    var role: User.Role
+    var role: UserRole
     
     func verify(using signer: JWTSigner) throws {
         try expiration.verifyNotExpired()

@@ -127,8 +127,9 @@ struct TicketController: RouteCollection {
         let data = try req.content.decode(CreateMessageRequest.self)
         let message = Message(
             content: data.content,
-            ticketID: ticket.id!,
-            userID: user.id!
+            conversationId: ticket.id!,
+            userId: user.id!,
+            ticketId: ticket.id!
         )
         
         try await message.save(on: req.db)

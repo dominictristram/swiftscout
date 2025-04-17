@@ -1,7 +1,7 @@
 import Fluent
 import Vapor
 
-final class EmailSettings: Model, Content {
+final class EmailSettings: Model, Content, Sendable {
     static let schema = "email_settings"
     
     @ID(key: .id)
@@ -30,6 +30,12 @@ final class EmailSettings: Model, Content {
     
     @Field(key: "smtp_password")
     var smtpPassword: String
+    
+    @Timestamp(key: "created_at", on: .create)
+    var createdAt: Date?
+    
+    @Timestamp(key: "updated_at", on: .update)
+    var updatedAt: Date?
     
     init() {}
     

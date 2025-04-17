@@ -1,4 +1,5 @@
 import Fluent
+import SQLKit
 
 struct CreateEmailSettings: AsyncMigration {
     func prepare(on database: any Database) async throws {
@@ -12,6 +13,8 @@ struct CreateEmailSettings: AsyncMigration {
             .field("smtp_port", .int, .required)
             .field("smtp_username", .string, .required)
             .field("smtp_password", .string, .required)
+            .field("created_at", .datetime)
+            .field("updated_at", .datetime)
             .create()
     }
     

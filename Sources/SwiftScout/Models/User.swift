@@ -2,14 +2,11 @@ import Fluent
 import Vapor
 import JWT
 
-final class User: Model, Authenticatable, AsyncResponseEncodable {
+final class User: Model, Content, Sendable {
     static let schema = "users"
     
     @ID(key: .id)
     var id: UUID?
-    
-    @Field(key: "name")
-    var name: String
     
     @Field(key: "email")
     var email: String
@@ -17,8 +14,11 @@ final class User: Model, Authenticatable, AsyncResponseEncodable {
     @Field(key: "password_hash")
     var passwordHash: String
     
+    @Field(key: "name")
+    var name: String
+    
     @Enum(key: "role")
-    var role: Role
+    var role: UserRole
     
     @Field(key: "is_suspended")
     var isSuspended: Bool
@@ -29,13 +29,13 @@ final class User: Model, Authenticatable, AsyncResponseEncodable {
     @Timestamp(key: "updated_at", on: .update)
     var updatedAt: Date?
     
-    init() {}
+    init() { }
     
-    init(id: UUID? = nil, name: String, email: String, passwordHash: String, role: Role, isSuspended: Bool = false) {
+    init(id: UUID? = nil, email: String, passwordHash: String, name: String, role: UserRole, isSuspended: Bool = false) {
         self.id = id
-        self.name = name
         self.email = email
         self.passwordHash = passwordHash
+        self.name = name
         self.role = role
         self.isSuspended = isSuspended
     }
@@ -53,18 +53,18 @@ final class User: Model, Authenticatable, AsyncResponseEncodable {
     }
 }
 
+enum UserRole: String, Codable, Sendable {
+    case admin
+    case agent
+    case customer
+}
+
 extension User {
-    enum Role: String, Codable {
-        case admin
-        case agent
-        case customer
-    }
-    
     struct Public: Content {
         let id: UUID?
         let name: String
         let email: String
-        let role: Role
+        let role: UserRole
         let isSuspended: Bool
     }
 }
@@ -79,7 +79,7 @@ extension User {
         var email: String
         var password: String
         var name: String
-        var role: Role
+        var role: UserRole
     }
     
     func generateToken(_ app: Application) throws -> String {

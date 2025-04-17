@@ -287,15 +287,7 @@ func routes(_ app: Application) throws {
         return try await req.view.render("dashboard", context)
     }
     
-    // Public routes
-    let publicRoutes = app.grouped("api", "v1")
-    publicRoutes.group("auth") { auth in
-        let authController = AuthController()
-        auth.post("register", use: authController.register)
-        auth.post("login", use: authController.login)
-    }
-    
-    // Protected routes
+    // System routes
     let protectedRoutes = app.grouped("api", "v1").grouped(User.authenticator())
     
     // Settings routes
@@ -328,5 +320,24 @@ func routes(_ app: Application) throws {
             user.put(use: userController.update)
             user.delete(use: userController.delete)
         }
+    }
+    
+    // System routes
+    protectedRoutes.group("system") { system in
+        let systemController = SystemController()
+        system.post("shutdown", use: systemController.shutdown)
+    }
+    
+    // Shutdown confirmation page
+    app.get("shutdown") { req -> View in
+        return try await req.view.render("shutdown")
+    }
+    
+    // Public routes
+    let publicRoutes = app.grouped("api", "v1")
+    publicRoutes.group("auth") { auth in
+        let authController = AuthController()
+        auth.post("register", use: authController.register)
+        auth.post("login", use: authController.login)
     }
 } 

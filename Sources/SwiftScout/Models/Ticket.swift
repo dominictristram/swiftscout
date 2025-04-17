@@ -39,7 +39,7 @@ final class Ticket: Model, Content {
     @OptionalParent(key: "assigned_to_id")
     var assignedTo: User?
     
-    @Children(for: \.$ticket)
+    @Children(for: \Message.$ticket)
     var messages: [Message]
     
     @Timestamp(key: "created_at", on: .create)
